@@ -1,3 +1,4 @@
+import { findNode } from '@angular/compiler';
 import { Output, Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({

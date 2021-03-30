@@ -1,64 +1,54 @@
-<div class="row mb-3">
+<div class="container-fluid">
+    <form [formGroup]="EditForm">
 
-    <div class="col-12">
-        <h5>Редактировать сотрудника</h5>
-    </div>
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Имя" 
+        formControlName="name"/>
+      </div>
 
-    <form [formGroup]="EditForm" (ngSubmit)="onEditWorker()">
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Отчество" 
+        formControlName="last_name"/>
+      </div>
 
-        <div class="col-12 mb-2">
-            <input type="text" class="form-control" placeholder="Имя"
-            formControlName="workerName">
-        </div>
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Фамилия" 
+        formControlName="surname"/>
+      </div>
 
-            <div class="alert alert-danger mb-3"
-            *ngIf="EditForm.controls['workerName'].invalid && EditForm.controls['workerName'].touched">
-            Введите имя!
-            </div>
-    
-        <div class="col-12 mb-2">   
-            <input type="text" class="form-control" placeholder="Фамилия"
-            formControlName="workerSurname">
-        </div>
+      <div class="form-group">
+        <input type="date" class="form-control" placeholder="Дата рождения"
+        formControlName="date_of_birth"/>
+      </div>
 
-            <div class="alert alert-danger mb-3"
-            *ngIf="EditForm.controls['workerSurname'].invalid && EditForm.controls['workerSurname'].touched">
-            Введите фамилию!
-            </div>
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Телефон" 
+        formControlName="phone"
+          [textMask]="{mask: mask}"/>
+      </div>
 
-        <div class="col-12 mb-2">
-        <input type="text" class="form-control" placeholder="Телефон"
-        [textMask]="{mask: mask}"
-        formControlName="workerPhone">
-        </div>
+      <div class="form-group">
+        <input type="mail" class="form-control" placeholder="Email" 
+        formControlName="email"/>
+      </div>
 
-            <div class="alert alert-danger mb-3"
-            *ngIf="EditForm.controls['workerPhone'].invalid && EditForm.controls['workerPhone'].touched">
-            Телефон не введён или введён неверно!
-            </div>            
+      <select class="mt-3 mb-3 custom-select" formControlName="type">
+        <option [ngValue]="MyWorkerType.IT">IT отдел</option>
+        <option [ngValue]="MyWorkerType.sales">Отдел продаж</option>
+        <option [ngValue]="MyWorkerType.delivery">Отдел доставки</option>
+        <option [ngValue]="MyWorkerType.lawyers">Юридический отдел</option>
+      </select>
 
-        <div class="col-12 mb-2">
-            <select class="custom-select"
-            formControlName="workerType">
-                <option [ngValue]="MyWorkerType.programmer">Программист</option>
-                <option [ngValue]="MyWorkerType.designer">Дизайнер</option>
-                <option [ngValue]="MyWorkerType.copywriter">Рекламщик</option>
-                <option [ngValue]="MyWorkerType.manager">Менеджер</option>
-            </select>
-        </div>
-    
-        <div class="col-12 mb-2">
-            <button class="btn btn-outline-warning btn-sm" type="submit"
-            [disabled]="EditForm.invalid"
-            >Сохранить</button>
-        </div>
+      <button class="btn btn-outline-primary mr-4" 
+      [disabled]="EditForm.invalid" 
+      (click)="onSave()"
+      >Сохранить
+      </button>
 
-        <div class="col-12">
-            <button class="btn btn-outline-secondary btn-sm"
-            (click)="closeEdit()"
-            >Отмена</button>
-        </div>
-
+      <button class="btn btn-outline-danger" 
+      *ngIf="id != null" 
+      (click)="onDelete()"
+      >Удалить</button>
+      
     </form>
-
-</div>
+  </div>

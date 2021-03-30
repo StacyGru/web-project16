@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MyWorker, MyWorkerType } from 'src/app/shared/worker.model';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpWorkerService } from 'src/app/shared/services/http-worker.service';
 
 @Component({
   selector: 'app-editform-worker',
@@ -10,44 +12,96 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 export class EditformWorkerComponent implements OnInit {
 
   id: number;
-  name: string;
-  surname: string;
-  type = 0;
+  worker: MyWorker;
   MyWorkerType = MyWorkerType;
   EditForm : FormGroup;
   public mask = ['+', 7, ' ', '(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/];
 
-  @Output() editWorker = new EventEmitter<MyWorker>();
-  @Output() cancelEdit = new EventEmitter();
-  @Input() workerData: object;
-
-  constructor() { }
+  constructor(
+    private activatedRouter: ActivatedRoute,
+    private HttpWorkerService: HttpWorkerService,
+    private router: Router
+  ) 
+  {
+    this.activatedRouter.params.subscribe((param) => 
+    {
+      this.id = param.id;
+    });
+  }
 
   ngOnInit(): void
   {
-    this.id = this.workerData["id"];
-    this.EditForm = new FormGroup
-    ({   
-      "workerName": new FormControl(this.workerData["name"], Validators.required),
-      "workerSurname": new FormControl(this.workerData["surname"], Validators.required),
-      "workerPhone": new FormControl(this.workerData["phone"], Validators.required),
-      "workerType": new FormControl(this.workerData["type"], Validators.required)
-  })
+    this.EditForm = new FormGroup({
+      name: new FormControl(null, [Validators.required]),
+      last_name: new FormControl(null, [Validators.required]),
+      surname: new FormControl(null, [Validators.required]),
+      date_of_birth: new FormControl(null, [Validators.required]),
+      phone: new FormControl(null, [Validators.required]),
+      email: new FormControl(null, [Validators.required]),
+      type: new FormControl(0, [Validators.required])
+    });
+    this.getData();
   }
 
-  onEditWorker() // привязано к форме редактирования
-  {
-      this.editWorker.emit({
-        id: this.id,
-        name: this.EditForm.get('workerName').value,
-        surname: this.EditForm.get('workerSurname').value,
-        phone: this.EditForm.get('workerPhone').value,
-        type: this.EditForm.get('workerType').value,
+  async getData() {
+    if ((this.id !== null)&&(this.id !== undefined)) 
+    {
+      try 
+      {
+        let worker = this.HttpWorkerService.getOneById(this.id);
+        this.worker = await worker;
+      } catch (err) 
+      {
+        console.error(err);
+      }
+      this.EditForm.patchValue({
+        name: this.worker.name,
+        last_name: this.worker.last_name,
+        surname: this.worker.surname,
+        date_of_birth: this.worker.date_of_birth,
+        phone: this.worker.phone,
+        email: this.worker.email,
+        type: this.worker.type
       });
+    }
   }
 
-  closeEdit()
+  async onSave() 
   {
-    this.cancelEdit.emit();
+    if ((this.id !== null)&&(this.id !== undefined)) 
+    {
+      try 
+      {
+        await this.HttpWorkerService.putOneById(this.id, this.EditForm.value);
+      } catch (err) 
+      {
+        console.error(err);
+      }
+    } 
+    else 
+    {
+      try 
+      {
+        let res = await this.HttpWorkerService.postOne(this.EditForm.value);
+        this.router.navigate([this.router.url, res.id]);
+        this.getData();
+      } 
+      catch (err) 
+      {
+        console.error(err);
+      }
+    }
+  }
+
+  async onDelete() 
+  {
+    try 
+    {
+      await this.HttpWorkerService.deleteOneById(this.id);
+    } catch (err) 
+    {
+      console.error(err);
+    }
+    this.router.navigate(['/workers']);
   }
 }

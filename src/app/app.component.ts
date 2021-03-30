@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MyWorker, MyWorkerType } from './shared/worker.model';
 import { HttpWorkerService } from './shared/services/http-worker.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +24,9 @@ export class AppComponent {
   };
   searchStr = '';
 
-  constructor(private httpProductService: HttpWorkerService) {}
+  constructor(
+    private httpProductService: HttpWorkerService,
+    private router: Router) {}
 
   ngOnInit()
   {
@@ -34,9 +37,21 @@ export class AppComponent {
   {
     try 
     {
-      this.workers = await this.httpProductService.getWorkers();
+      let workers = this.httpProductService.getAll();
+      this.workers = (await workers === null)||(await workers === undefined) 
+        ? [] 
+        : await workers;
     }
     catch(err) 
+    {
+      console.log(err);
+    }
+
+    try 
+    {
+      this.workers = await this.httpProductService.getAll();
+    } 
+    catch (err) 
     {
       console.log(err);
     }
@@ -51,7 +66,7 @@ export class AppComponent {
           ? this.workers[this.workers.length - 1].id + 1
           : 0;
       worker.id = id;
-      await this.httpProductService.postWorker(worker);
+      await this.httpProductService.postOne(worker);
     }
     catch(err)
     {
@@ -67,7 +82,7 @@ export class AppComponent {
   {
     try
     {
-      await this.httpProductService.editWorker(worker);
+      await this.httpProductService.putOneById(worker.id, worker);
     }
     catch(err)
     {
@@ -84,7 +99,7 @@ export class AppComponent {
   {
     try
     {
-      await this.httpProductService.deleteWorker(id);
+      await this.httpProductService.deleteOneById(id);
     }
     catch(err)
     {
@@ -101,11 +116,11 @@ export class AppComponent {
     return this.workers.filter((worker) => worker.type === type);
   }
 
-  onEditById(id: number)  // привязано к таблицам
+  onEditById(id: number)
   {
     let index = this.workers.findIndex((worker) => worker.id === id);
     this.workerData = 
-    { // посылает данные в форму редактирования
+    {
       id: this.workers[index].id,
       name: this.workers[index].name,
       surname: this.workers[index].surname,
